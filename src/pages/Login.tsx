@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Login.css";
 
 function Login() {
@@ -6,8 +7,10 @@ function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string>("");
+    const [loading, setLoading] = useState(false);
+    const [success, setSuccess] = useState("");
 
-    // Clean values
+    const navigate = useNavigate();
     const trimmedEmail = email.trim();
     const trimmedPassword = password.trim();
 
@@ -17,7 +20,17 @@ function Login() {
         trimmedEmail.includes(".") &&
         trimmedPassword.length >= 6;
 
-    function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    async function fakeLogin(email: string, password: string): Promise<boolean> {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                resolve(
+                    email === "admin@gmail.com" &&
+                    password === "123456"
+                );
+            }, 2000);
+        });
+    }
+    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
         if (!trimmedEmail) {
@@ -41,9 +54,26 @@ function Login() {
         }
 
         setError("");
+        setSuccess("");
+        setLoading(true);
 
-        console.log("Email:", trimmedEmail);
-        console.log("Password:", trimmedPassword);
+        try {
+            const loginSuccessful = await fakeLogin(
+                trimmedEmail,
+                trimmedPassword
+            );
+
+            if (loginSuccessful) {
+                localStorage.setItem("isLoggedIn", "true");
+                navigate("/dashboard");
+            } else {
+                setError("Invalid email or password");
+            }
+        } catch {
+            setError("Something went wrong. Please try again.");
+        } finally {
+            setLoading(false);
+        }
     }
 
     return (
@@ -101,13 +131,14 @@ function Login() {
                     </a>
 
                     {error && <p className="error-message">{error}</p>}
+                    {success && <p className="success-message">{success}</p>}
 
                     <button
                         type="submit"
                         className="login-button"
-                        disabled={!isFormValid}
+                        disabled={!isFormValid || loading}
                     >
-                        Login
+                        {loading ? "Logging in..." : "Login"}
                     </button>
                 </form>
 

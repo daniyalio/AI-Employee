@@ -120,3 +120,8 @@
     cursor: not-allowed;
     opacity: 0.7;
 }
+
+.success-message {
+    color: green;
+    margin-top: 10px;
+}
