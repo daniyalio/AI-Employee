@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
+import { useAuth } from "../context/AuthContext"
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
 
+
 function Login() {
+    const { login } = useAuth();
     const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -30,7 +33,7 @@ function Login() {
             }, 2000);
         });
     }
-    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
         if (!trimmedEmail) {
@@ -64,7 +67,7 @@ function Login() {
             );
 
             if (loginSuccessful) {
-                localStorage.setItem("isLoggedIn", "true");
+                login();
                 navigate("/dashboard");
             } else {
                 setError("Invalid email or password");

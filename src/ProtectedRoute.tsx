@@ -1,23 +1,19 @@
 import { Navigate } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
+import type { ReactNode } from "react";
 
-function ProtectedRoute( {children} )  {
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
+type ProtectedRouteProps = {
+    children: ReactNode;
+};
 
-    if(!isLoggedIn){
-        return <Navigate to = "/login" replace />
-    }
-    return children;
-}
-
-export default ProtectedRoute;
-
-/*function ProtectedRoute(props) {
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
+function ProtectedRoute({ children }: { ProtectedRouteProps }) {
+    const { isLoggedIn } = useAuth();
 
     if (!isLoggedIn) {
         return <Navigate to="/login" replace />;
     }
 
-    return props.children;
+    return children;
 }
-    */
+
+export default ProtectedRoute;

@@ -1,10 +1,12 @@
 import { useNavigate } from "react-router-dom"
+import { useAuth } from "../context/AuthContext"
 
 function Dashboard() {
+    const { logout } = useAuth();
     const navigate = useNavigate();
 
     function handleLogout() {
-        localStorage.removeItem("isLoggedIn");
+        logout();
         navigate("/login");
     }
     return (
