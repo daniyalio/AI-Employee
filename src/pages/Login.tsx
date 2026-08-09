@@ -1,38 +1,28 @@
 import { useState, type FormEvent } from "react";
-import { useAuth } from "../context/AuthContext"
+import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
-
+import { loginUser } from "../api/authApi";
 
 function Login() {
     const { login } = useAuth();
+    const navigate = useNavigate();
+
     const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [error, setError] = useState<string>("");
+    const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState("");
 
-    const navigate = useNavigate();
     const trimmedEmail = email.trim();
     const trimmedPassword = password.trim();
 
-    // Used only to enable/disable the Login button
     const isFormValid =
         trimmedEmail.includes("@") &&
         trimmedEmail.includes(".") &&
         trimmedPassword.length >= 6;
 
-    async function fakeLogin(email: string, password: string): Promise<boolean> {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve(
-                    email === "admin@gmail.com" &&
-                    password === "123456"
-                );
-            }, 2000);
-        });
-    }
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
@@ -61,19 +51,26 @@ function Login() {
         setLoading(true);
 
         try {
-            const loginSuccessful = await fakeLogin(
-                trimmedEmail,
-                trimmedPassword
-            );
+            const response = await loginUser({
+                email: trimmedEmail,
+                password: trimmedPassword,
+            });
 
-            if (loginSuccessful) {
-                login();
-                navigate("/dashboard");
-            } else {
+            if (!response.success) {
                 setError("Invalid email or password");
+                return;
             }
-        } catch {
-            setError("Something went wrong. Please try again.");
+
+            login(response.token, response.user);
+
+            setSuccess("Login successful!");
+            navigate("/dashboard");
+        } catch (error) {
+            setError(
+                error instanceof Error
+                    ? error.message
+                    : "Something went wrong. Please try again."
+            );
         } finally {
             setLoading(false);
         }
@@ -123,7 +120,9 @@ function Login() {
                         <button
                             className="password-toggle"
                             type="button"
-                            onClick={() => setShowPassword(!showPassword)}
+                            onClick={() =>
+                                setShowPassword(!showPassword)
+                            }
                         >
                             👁
                         </button>
@@ -133,8 +132,13 @@ function Login() {
                         Forgot Password?
                     </a>
 
-                    {error && <p className="error-message">{error}</p>}
-                    {success && <p className="success-message">{success}</p>}
+                    {error && (
+                        <p className="error-message">{error}</p>
+                    )}
+
+                    {success && (
+                        <p className="success-message">{success}</p>
+                    )}
 
                     <button
                         type="submit"

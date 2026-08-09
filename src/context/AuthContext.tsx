@@ -1,30 +1,49 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
+import {
+    createContext,
+    useContext,
+    useState,
+    type ReactNode,
+} from "react";
+import { setAuthToken } from "../api/apiClient";
+
+type User = {
+    id: number;
+    name: string;
+    role: "admin" | "student";
+};
 
 type AuthContextType = {
     isLoggedIn: boolean;
-    login: () => void;
+    user: User | null;
+    token: string | null;
+    login: (token: string, user: User) => void;
     logout: () => void;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-    const [isLoggedIn, setIsLoggedIn] = useState(() => {
-        return localStorage.getItem("isLoggedIn") === "true";
-    });
+    const [token, setToken] = useState<string | null>(null);
+    const [user, setUser] = useState<User | null>(null);
 
-    function login() {
-        setIsLoggedIn(true);
-        localStorage.setItem("isLoggedIn", "true");
+    const isLoggedIn = token !== null;
+
+    function login(newToken: string, newUser: User) {
+        setToken(newToken);
+        setUser(newUser);
+        setAuthToken(newToken);
     }
 
     function logout() {
-        setIsLoggedIn(false);
-        localStorage.removeItem("isLoggedIn");
+        setToken(null);
+        setUser(null);
+        setAuthToken(null);
     }
 
     const value = {
         isLoggedIn,
+        user,
+        token,
         login,
         logout,
     };

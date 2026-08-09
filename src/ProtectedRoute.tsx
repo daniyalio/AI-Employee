@@ -6,7 +6,7 @@ type ProtectedRouteProps = {
     children: ReactNode;
 };
 
-function ProtectedRoute({ children }: { ProtectedRouteProps }) {
+function ProtectedRoute({ children }: ProtectedRouteProps) {
     const { isLoggedIn } = useAuth();
 
     if (!isLoggedIn) {
