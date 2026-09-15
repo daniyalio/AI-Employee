@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./ProtectedRoute";
@@ -7,8 +7,8 @@ function App() {
     return (
         <BrowserRouter>
             <Routes>
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
                 <Route path="/login" element={<Login />} />
-
                 <Route
                     path="/dashboard"
                     element={
@@ -17,6 +17,7 @@ function App() {
                         </ProtectedRoute>
                     }
                 />
+                <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
         </BrowserRouter>
     );

@@ -1,165 +1,70 @@
 import { useState, type FormEvent } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import "./Login.css";
 import { loginUser } from "../api/authApi";
+import "./Login.css";
 
-function Login() {
-    const { login } = useAuth();
-    const navigate = useNavigate();
+const DEV_EMAIL = "demo@aiemployee.local";
+const DEV_PASSWORD = "employee123";
 
-    const [showPassword, setShowPassword] = useState(false);
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [success, setSuccess] = useState("");
+export default function Login() {
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-    const trimmedEmail = email.trim();
-    const trimmedPassword = password.trim();
+  function useDemoAccount() {
+    setEmail(DEV_EMAIL);
+    setPassword(DEV_PASSWORD);
+    setError("");
+  }
 
-    const isFormValid =
-        trimmedEmail.includes("@") &&
-        trimmedEmail.includes(".") &&
-        trimmedPassword.length >= 6;
-
-    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-        event.preventDefault();
-
-        if (!trimmedEmail) {
-            setError("Email is required");
-            return;
-        }
-
-        if (!trimmedEmail.includes("@") || !trimmedEmail.includes(".")) {
-            setError("Invalid email address");
-            return;
-        }
-
-        if (!trimmedPassword) {
-            setError("Password is required");
-            return;
-        }
-
-        if (trimmedPassword.length < 6) {
-            setError("Password must be at least 6 characters long");
-            return;
-        }
-
-        setError("");
-        setSuccess("");
-        setLoading(true);
-
-        try {
-            const response = await loginUser({
-                email: trimmedEmail,
-                password: trimmedPassword,
-            });
-
-            if (!response.success) {
-                setError("Invalid email or password");
-                return;
-            }
-
-            login(response.token, response.user);
-
-            setSuccess("Login successful!");
-            navigate("/dashboard");
-        } catch (error) {
-            setError(
-                error instanceof Error
-                    ? error.message
-                    : "Something went wrong. Please try again."
-            );
-        } finally {
-            setLoading(false);
-        }
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!email.trim() || password.length < 8) {
+      setError("Enter a valid email and a password with at least 8 characters.");
+      return;
     }
 
-    return (
-        <div className="login-page">
-            <div className="login-card">
-                <h1 className="login-heading">Login</h1>
+    setError("");
+    setLoading(true);
+    try {
+      login(await loginUser({ email, password }));
+      navigate("/dashboard");
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : "Unable to sign in.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
-                <form onSubmit={handleSubmit}>
-                    <label htmlFor="email" className="login-label">
-                        Email
-                    </label>
-
-                    <input
-                        id="email"
-                        className="login-input"
-                        type="email"
-                        placeholder="Enter your Email"
-                        autoComplete="email"
-                        value={email}
-                        onChange={(e) => {
-                            setEmail(e.target.value);
-                            setError("");
-                        }}
-                    />
-
-                    <label htmlFor="password" className="login-label">
-                        Password
-                    </label>
-
-                    <div className="password-container">
-                        <input
-                            id="password"
-                            className="login-input"
-                            type={showPassword ? "text" : "password"}
-                            placeholder="Enter your Password"
-                            autoComplete="current-password"
-                            value={password}
-                            onChange={(e) => {
-                                setPassword(e.target.value);
-                                setError("");
-                            }}
-                        />
-
-                        <button
-                            className="password-toggle"
-                            type="button"
-                            onClick={() =>
-                                setShowPassword(!showPassword)
-                            }
-                        >
-                            👁
-                        </button>
-                    </div>
-
-                    <a className="forgot-password" href="#">
-                        Forgot Password?
-                    </a>
-
-                    {error && (
-                        <p className="error-message">{error}</p>
-                    )}
-
-                    {success && (
-                        <p className="success-message">{success}</p>
-                    )}
-
-                    <button
-                        type="submit"
-                        className="login-button"
-                        disabled={!isFormValid || loading}
-                    >
-                        {loading ? "Logging in..." : "Login"}
-                    </button>
-                </form>
-
-                <div className="signup-section">
-                    <p className="signup-text">
-                        Don't have an account?
-                        <a href="#" className="signup-link">
-                            Sign Up
-                        </a>
-                    </p>
-                </div>
-            </div>
+  return (
+    <div className="login-page">
+      <div className="login-card">
+        <div className="login-brand"><span>✦</span> AI Employee</div>
+        <h1 className="login-heading">Welcome back.</h1>
+        <p className="login-subtitle">Sign in to your autonomous workspace.</p>
+        <form onSubmit={handleSubmit}>
+          <label htmlFor="email" className="login-label">Email</label>
+          <input id="email" className="login-input" type="email" placeholder="you@company.com" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <label htmlFor="password" className="login-label">Password</label>
+          <div className="password-container">
+            <input id="password" className="login-input" type={showPassword ? "text" : "password"} placeholder="Your password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <button className="password-toggle" type="button" onClick={() => setShowPassword((visible) => !visible)}>{showPassword ? "◉" : "◌"}</button>
+          </div>
+          {error && <p className="error-message">{error}</p>}
+          <button type="submit" className="login-button" disabled={loading}>{loading ? "Signing in..." : "Sign in"}</button>
+        </form>
+        <div className="dev-credentials">
+          <strong>Development account</strong>
+          <p>Email: <code>{DEV_EMAIL}</code></p>
+          <p>Password: <code>{DEV_PASSWORD}</code></p>
+          <button type="button" onClick={useDemoAccount}>Use these credentials</button>
         </div>
-    );
+      </div>
+    </div>
+  );
 }
-
-export default Login;
