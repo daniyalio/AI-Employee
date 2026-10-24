@@ -1,0 +1,100 @@
+{
+  "name": "code-explain",
+  "displayName": "CodeExplain",
+  "description": "Automatically explain selected code with your own API key or local Ollama model.",
+  "version": "0.1.0",
+  "publisher": "codeexplain",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://example.com/codeexplain"
+  },
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other",
+    "Visualization"
+  ],
+  "activationEvents": [
+    "onStartupFinished",
+    "onCommand:codeExplain.configureProvider",
+    "onCommand:codeExplain.explainSelection",
+    "onCommand:codeExplain.exportExplanation"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "codeExplain.configureProvider",
+        "title": "CodeExplain: Configure AI Provider"
+      },
+      {
+        "command": "codeExplain.explainSelection",
+        "title": "CodeExplain: Explain Selection"
+      },
+      {
+        "command": "codeExplain.exportExplanation",
+        "title": "CodeExplain: Export Explanation"
+      }
+    ],
+    "configuration": {
+      "title": "CodeExplain",
+      "properties": {
+        "codeExplain.provider": {
+          "type": "string",
+          "enum": ["ollama", "openai-compatible"],
+          "enumDescriptions": [
+            "Use a local Ollama server without sending code to the cloud.",
+            "Use a provider with an OpenAI-compatible chat completions API."
+          ],
+          "default": "ollama",
+          "description": "AI provider used for code explanations."
+        },
+        "codeExplain.ollamaBaseUrl": {
+          "type": "string",
+          "default": "http://127.0.0.1:11434",
+          "description": "Ollama server URL."
+        },
+        "codeExplain.ollamaModel": {
+          "type": "string",
+          "default": "qwen2.5-coder:7b",
+          "description": "Installed Ollama model used for explanations."
+        },
+        "codeExplain.openAICompatibleBaseUrl": {
+          "type": "string",
+          "default": "https://api.openai.com/v1",
+          "description": "Base URL for an OpenAI-compatible API."
+        },
+        "codeExplain.openAICompatibleModel": {
+          "type": "string",
+          "default": "gpt-4o-mini",
+          "description": "Model name for the OpenAI-compatible provider."
+        },
+        "codeExplain.minimumSelectionCharacters": {
+          "type": "number",
+          "default": 20,
+          "minimum": 1,
+          "description": "Minimum selection length before automatic explanation starts."
+        },
+        "codeExplain.autoExplain": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically explain a stable editor selection."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p tsconfig.json",
+    "watch": "tsc -p tsconfig.json --watch",
+    "package": "npm run compile && npx @vscode/vsce package",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/vscode": "^1.90.0",
+    "typescript": "^5.7.0",
+    "@vscode/vsce": "^3.2.0"
+  }
+}
