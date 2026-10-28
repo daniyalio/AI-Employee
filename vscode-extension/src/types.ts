@@ -14,3 +14,8 @@ export type ProviderConfig = {
   openAICompatibleBaseUrl: string;
   openAICompatibleModel: string;
 };
+
+export type SupportConfig = {
+  buyMeACoffeeUrl: string;
+  githubSponsorsUrl: string;
+};

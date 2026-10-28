@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { ExplanationPanel } from './panel';
-import { ProviderConfig } from './types';
+import { ProviderConfig, SupportConfig } from './types';
 
 let panel: ExplanationPanel | undefined;
 let selectionTimer: ReturnType<typeof setTimeout> | undefined;
@@ -15,6 +15,53 @@ export function activate(context: vscode.ExtensionContext): void {
       openAICompatibleBaseUrl: config.get('openAICompatibleBaseUrl', 'https://api.openai.com/v1'),
       openAICompatibleModel: config.get('openAICompatibleModel', 'gpt-4o-mini')
     };
+  };
+
+  const getSupport = (): SupportConfig => {
+    const config = vscode.workspace.getConfiguration('codeExplain');
+    return {
+      buyMeACoffeeUrl: config.get('buyMeACoffeeUrl', ''),
+      githubSponsorsUrl: config.get('githubSponsorsUrl', '')
+    };
+  };
+
+  const openSupport = async (): Promise<void> => {
+    const support = getSupport();
+    const links = [
+      ...(support.buyMeACoffeeUrl ? [{ label: 'Buy Me a Coffee', url: support.buyMeACoffeeUrl }] : []),
+      ...(support.githubSponsorsUrl ? [{ label: 'GitHub Sponsors', url: support.githubSponsorsUrl }] : [])
+    ];
+    if (!links.length) {
+      const configured = await vscode.window.showInputBox({
+        prompt: 'Paste your Buy Me a Coffee URL (or leave blank to configure it later)',
+        placeHolder: 'https://buymeacoffee.com/yourname'
+      });
+      if (configured) {
+        await vscode.workspace.getConfiguration('codeExplain').update('buyMeACoffeeUrl', configured.trim(), vscode.ConfigurationTarget.Global);
+        await vscode.env.openExternal(vscode.Uri.parse(configured.trim()));
+      }
+      return;
+    }
+    const choice = links.length === 1
+      ? links[0]
+      : await vscode.window.showQuickPick(links, { placeHolder: 'Choose how to support CodeExplain' });
+    if (choice) await vscode.env.openExternal(vscode.Uri.parse(choice.url));
+  };
+
+  const maybeShowSupportReminder = async (): Promise<void> => {
+    const config = vscode.workspace.getConfiguration('codeExplain');
+    if (!config.get('showSupportReminders', true)) return;
+    const intervalDays = config.get('supportReminderIntervalDays', 30);
+    const lastShown = context.globalState.get<number>('codeExplain.supportReminderShownAt', 0);
+    const interval = intervalDays * 24 * 60 * 60 * 1000;
+    if (Date.now() - lastShown < interval) return;
+    await context.globalState.update('codeExplain.supportReminderShownAt', Date.now());
+    const action = await vscode.window.showInformationMessage(
+      'CodeExplain is free and maintained independently. If it helps you, you can support development.',
+      'Support',
+      'Not now'
+    );
+    if (action === 'Support') await openSupport();
   };
 
   const configure = async (): Promise<void> => {
@@ -32,11 +79,16 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   };
 
-  panel = new ExplanationPanel(context.extensionUri, context.secrets, getConfig, configure);
+  panel = new ExplanationPanel(context.extensionUri, context.secrets, getConfig, configure, getSupport, openSupport);
   context.subscriptions.push({ dispose: () => panel?.dispose() });
   context.subscriptions.push(vscode.commands.registerCommand('codeExplain.configureProvider', configure));
   context.subscriptions.push(vscode.commands.registerCommand('codeExplain.explainSelection', () => explainActiveSelection(panel!, getConfig)));
   context.subscriptions.push(vscode.commands.registerCommand('codeExplain.exportExplanation', () => panel?.exportExplanation()));
+  context.subscriptions.push(vscode.commands.registerCommand('codeExplain.support', openSupport));
+  const output = vscode.window.createOutputChannel('CodeExplain');
+  output.appendLine('CodeExplain is free. Use CodeExplain: Support This Project if it saves you time.');
+  context.subscriptions.push(output);
+  void maybeShowSupportReminder();
   context.subscriptions.push(vscode.window.onDidChangeTextEditorSelection((event) => {
     if (!vscode.workspace.getConfiguration('codeExplain').get('autoExplain', true)) return;
     if (selectionTimer) clearTimeout(selectionTimer);

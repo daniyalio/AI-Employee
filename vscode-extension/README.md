@@ -8,6 +8,15 @@ CodeExplain automatically explains selected code in a side panel. It supports:
 - Follow-up questions.
 - Markdown export.
 
+## Support development
+
+CodeExplain is free to use and does not include a required subscription. If it saves you time, you can support continued development:
+
+- Buy Me a Coffee: configure your page URL in the VS Code setting `codeExplain.buyMeACoffeeUrl`.
+- GitHub Sponsors: configure your profile URL in `codeExplain.githubSponsorsUrl`.
+
+You can also run `CodeExplain: Support This Project` from the Command Palette. Support reminders are occasional and can be disabled with `codeExplain.showSupportReminders`.
+
 ## Run locally
 
 1. Install Node.js and VS Code.

@@ -36,6 +36,10 @@
       {
         "command": "codeExplain.exportExplanation",
         "title": "CodeExplain: Export Explanation"
+      },
+      {
+        "command": "codeExplain.support",
+        "title": "CodeExplain: Support This Project"
       }
     ],
     "configuration": {
@@ -81,6 +85,27 @@
           "type": "boolean",
           "default": true,
           "description": "Automatically explain a stable editor selection."
+        },
+        "codeExplain.showSupportReminders": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show an occasional, dismissible reminder that CodeExplain is free to support."
+        },
+        "codeExplain.supportReminderIntervalDays": {
+          "type": "number",
+          "default": 30,
+          "minimum": 1,
+          "description": "Minimum number of days between support reminders."
+        },
+        "codeExplain.buyMeACoffeeUrl": {
+          "type": "string",
+          "default": "",
+          "description": "Your Buy Me a Coffee support page URL."
+        },
+        "codeExplain.githubSponsorsUrl": {
+          "type": "string",
+          "default": "",
+          "description": "Your GitHub Sponsors profile URL."
         }
       }
     }
