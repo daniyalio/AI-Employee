@@ -81,6 +81,25 @@
           "minimum": 1,
           "description": "Minimum selection length before automatic explanation starts."
         },
+        "codeExplain.selectionDelayMs": {
+          "type": "number",
+          "default": 400,
+          "minimum": 100,
+          "maximum": 3000,
+          "description": "Milliseconds to wait after selection changes before starting an explanation."
+        },
+        "codeExplain.maxOutputTokens": {
+          "type": "number",
+          "default": 512,
+          "minimum": 128,
+          "maximum": 4096,
+          "description": "Maximum explanation length. Smaller values return faster."
+        },
+        "codeExplain.ollamaKeepAlive": {
+          "type": "string",
+          "default": "10m",
+          "description": "How long Ollama keeps the selected model loaded between requests."
+        },
         "codeExplain.autoExplain": {
           "type": "boolean",
           "default": true,

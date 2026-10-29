@@ -13,6 +13,8 @@ export type ProviderConfig = {
   ollamaModel: string;
   openAICompatibleBaseUrl: string;
   openAICompatibleModel: string;
+  maxOutputTokens: number;
+  ollamaKeepAlive: string;
 };
 
 export type SupportConfig = {

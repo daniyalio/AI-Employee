@@ -36,6 +36,8 @@ ollama pull qwen2.5-coder:7b
 
 The extension defaults to `http://127.0.0.1:11434` and `qwen2.5-coder:7b`. Change these in VS Code settings if needed.
 
+For faster responses, try `llama3.2:3b`. For stronger code-focused explanations, use `qwen2.5-coder:7b`. The first request after Ollama starts can be slower while the model loads; later requests stay warm for the configured keep-alive period.
+
 ## Security and privacy
 
 - API keys are stored in VS Code Secret Storage, not settings files.

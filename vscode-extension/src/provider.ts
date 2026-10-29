@@ -39,7 +39,8 @@ async function streamOllama(
         { role: 'system', content: buildSystemPrompt() },
         { role: 'user', content: buildUserPrompt(request) }
       ],
-      options: { temperature: 0.2 }
+      keep_alive: config.ollamaKeepAlive,
+      options: { temperature: 0.2, num_predict: config.maxOutputTokens, num_ctx: 4096 }
     })
   });
 
@@ -71,6 +72,7 @@ async function streamOpenAICompatible(
       model: config.openAICompatibleModel,
       stream: true,
       temperature: 0.2,
+      max_tokens: config.maxOutputTokens,
       messages: [
         { role: 'system', content: buildSystemPrompt() },
         { role: 'user', content: buildUserPrompt(request) }

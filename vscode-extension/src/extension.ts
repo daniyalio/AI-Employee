@@ -13,7 +13,9 @@ export function activate(context: vscode.ExtensionContext): void {
       ollamaBaseUrl: config.get('ollamaBaseUrl', 'http://127.0.0.1:11434'),
       ollamaModel: config.get('ollamaModel', 'qwen2.5-coder:7b'),
       openAICompatibleBaseUrl: config.get('openAICompatibleBaseUrl', 'https://api.openai.com/v1'),
-      openAICompatibleModel: config.get('openAICompatibleModel', 'gpt-4o-mini')
+      openAICompatibleModel: config.get('openAICompatibleModel', 'gpt-4o-mini'),
+      maxOutputTokens: config.get('maxOutputTokens', 512),
+      ollamaKeepAlive: config.get('ollamaKeepAlive', '10m')
     };
   };
 
@@ -75,7 +77,16 @@ export function activate(context: vscode.ExtensionContext): void {
       const key = await vscode.window.showInputBox({ prompt: 'Paste your API key (stored in VS Code Secret Storage)', password: true, ignoreFocusOut: true });
       if (key) await context.secrets.store('codeExplain.openAICompatibleApiKey', key);
     } else {
-      void vscode.window.showInformationMessage('Ollama selected. Install Ollama, start it, and pull the configured model.');
+      const currentModel = vscode.workspace.getConfiguration('codeExplain').get('ollamaModel', 'qwen2.5-coder:7b');
+      const model = await vscode.window.showInputBox({
+        prompt: 'Which installed Ollama model should CodeExplain use?',
+        value: currentModel,
+        placeHolder: 'qwen2.5-coder:7b or llama3.2:3b'
+      });
+      if (model?.trim()) {
+        await vscode.workspace.getConfiguration('codeExplain').update('ollamaModel', model.trim(), vscode.ConfigurationTarget.Global);
+      }
+      void vscode.window.showInformationMessage('Ollama selected. Smaller models such as llama3.2:3b respond faster; coding models usually explain code more accurately.');
     }
   };
 
@@ -92,7 +103,8 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(vscode.window.onDidChangeTextEditorSelection((event) => {
     if (!vscode.workspace.getConfiguration('codeExplain').get('autoExplain', true)) return;
     if (selectionTimer) clearTimeout(selectionTimer);
-    selectionTimer = setTimeout(() => void explainActiveSelection(panel!, getConfig, event), 650);
+    const delay = vscode.workspace.getConfiguration('codeExplain').get('selectionDelayMs', 400);
+    selectionTimer = setTimeout(() => void explainActiveSelection(panel!, getConfig, event), delay);
   }));
 }
 
